@@ -15,7 +15,7 @@
     </style>
   </head>
   <body>
-    <canvas id="myCanvas" width="1681" height="400"></canvas>
+    <canvas id="myCanvas" width="1681" height="800"></canvas>
     <script>
       window.requestAnimFrame = (function(callback) {
         return window.requestAnimationFrame ||
@@ -31,19 +31,33 @@
       function drawRectangle(myRectangle, context) {
         context.beginPath();
         context.rect(myRectangle.x, myRectangle.y, myRectangle.width, myRectangle.height);
-        // context.fillStyle = '#0363B6';
         context.fillStyle = myRectangle.color;
         context.fill();
         context.lineWidth = myRectangle.borderWidth;
-        // context.strokeStyle = '#4CB1FF';
-        context.strokeStyle = myRectangle.strokeColor;
-        context.stroke();
       }
 
-      // function animate(myRectangle, canvas, context, linearSpeed) {
-      function animate(rectangles, canvas, context) {
+      function drawCircle(circle, context) {
+        context.beginPath();
+        context.arc(circle.x, circle.y, circle.radius, 0, 2 * Math.PI, false);
+        context.fillStyle = circle.color;
+        context.fill();
+      }
+
+      function drawLogo(logo, circleReference, context) {
+        var width = 750,
+            height = 200,
+            x = circleReference.x - (width / 2),
+            y = circleReference.y - (height / 2);
+        context.drawImage(logo, x, y, width, height);
+      }
+
+      function animate(rectangles, circles, logo, canvas, context) {
         // update
         context.clearRect(0, 0, canvas.width, canvas.height);
+
+        circles.forEach(function(circle) {
+          drawCircle(circle, context);
+        });
 
         rectangles.forEach(function(myRectangle) {
           var linearSpeed = myRectangle.linearSpeed || 1;
@@ -59,11 +73,13 @@
           }
 
           drawRectangle(myRectangle, context);
-        })
+        });
+
+        drawLogo(logo, circles[0], context);
 
         // request new frame
         requestAnimFrame(function() {
-          animate(rectangles, canvas, context);
+          animate(rectangles, circles, logo, canvas, context);
         });
       }
 
@@ -89,26 +105,44 @@
             linearSpeed: randomLinearSpeed < 1 ?
                          randomSeed == 1 ? 1 : -1 :
                          randomSeed == 0 ? randomLinearSpeed : -randomLinearSpeed,
-            color: rectangleColor,
-            strokeColor: '#4CB1FF'
+            color: rectangleColor
           });
         }
         return rectangles;
       }
 
-      var colors = ['#6FC2F2', '#0363B6', '#454545', '#000000'];
-      // light blue, dark blue, light black, dark black
-      var rectangles = generateRectangles(50, colors, canvas);
+      function generateCircles(circleCount, colors, cricleX, circleY, canvas) {
+        var circles = [];
+        for (step = 0; step < circleCount; step++) {
+          circles.push({
+            x: circleX,
+            y: circleY,
+            color: colors[step],
+            radius: (canvas.width / 1.45) / (step == 0 ? 0.1 : step)
+          });
+        };
+        return circles;
+      }
 
+      var colors = ['#6FC2F2', '#0363B6', '#454545', '#000000'],
+          circleX = canvas.width * 0.75,
+          circleY = canvas.height * 0.50;
+      // light blue, dark blue, light black, dark black
+      var circles = generateCircles(4, colors, circleX, circleY, canvas);
+      circles.forEach(function(circle) {
+        drawCircle(circle, context);
+      })
+      var rectangles = generateRectangles(80, colors, canvas);
       rectangles.forEach(function(rectangle) {
         drawRectangle(rectangle, context);
       })
-      // drawRectangle(myRectangle, context);
-      // drawRectangle(myRectangle2, context);
+      var chiliLogo = new Image();
+      chiliLogo.src = "ElectricChilico_logo.png";
+      drawLogo(chiliLogo, circles[0], context);
 
       // wait one second before starting animation
       setTimeout(function() {
-        animate(rectangles, canvas, context);
+        animate(rectangles, circles, chiliLogo, canvas, context);
       }, 1000);
     </script>
   </body>
