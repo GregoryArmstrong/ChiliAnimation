@@ -15,7 +15,7 @@
     </style>
   </head>
   <body>
-    <canvas id="myCanvas" width="1681" height="200"></canvas>
+    <canvas id="myCanvas" width="1681" height="400"></canvas>
     <script>
       window.requestAnimFrame = (function(callback) {
         return window.requestAnimationFrame ||
@@ -31,97 +31,84 @@
       function drawRectangle(myRectangle, context) {
         context.beginPath();
         context.rect(myRectangle.x, myRectangle.y, myRectangle.width, myRectangle.height);
-        context.fillStyle = '#0363B6';
+        // context.fillStyle = '#0363B6';
+        context.fillStyle = myRectangle.color;
         context.fill();
         context.lineWidth = myRectangle.borderWidth;
-        context.strokeStyle = '#4CB1FF';
+        // context.strokeStyle = '#4CB1FF';
+        context.strokeStyle = myRectangle.strokeColor;
         context.stroke();
       }
 
-      // function animate(myRectangle, canvas, context, startTime) {
-      //   // update
-      //   var time = (new Date()).getTime() - startTime;
-      //
-      //   var linearSpeed = 100;
-      //   // pixels / second
-      //   var newX = linearSpeed * time / 1000;
-      //
-      //   if(newX < (canvas.width - myRectangle.width - myRectangle.borderWidth / 2)) {
-      //     myRectangle.x = newX;
-      //   }
-      //
-      //   // clear
-      //   context.clearRect(0, 0, canvas.width, canvas.height);
-      //
-      //   drawRectangle(myRectangle, context);
-      //
-      //   // request new frame
-      //   requestAnimFrame(function() {
-      //     animate(myRectangle, canvas, context, startTime);
-      //   });
-      // }
-      //
-      // var canvas = document.getElementById('myCanvas');
-      // var context = canvas.getContext('2d');
-      //
-      // var myRectangle = {
-      //   x: 0,
-      //   y: 75,
-      //   width: 150,
-      //   height: 15,
-      //   borderWidth: 1
-      // };
-      //
-      // drawRectangle(myRectangle, context);
-      //
-      // // wait one second before starting animation
-      // setTimeout(function() {
-      //   var startTime = (new Date()).getTime();
-      //   animate(myRectangle, canvas, context, startTime);
-      // }, 1000);
-
-      function animate(myRectangle, canvas, context, linearSpeed) {
+      // function animate(myRectangle, canvas, context, linearSpeed) {
+      function animate(rectangles, canvas, context) {
         // update
-
-        var linearSpeed = linearSpeed || 1;
-        // pixels / second
-        var newX = myRectangle.x + linearSpeed;
-
-        if (newX < 0) {
-          linearSpeed = -linearSpeed;
-        } else if (newX < (canvas.width - myRectangle.width - myRectangle.borderWidth / 2)) {
-          myRectangle.x = newX;
-        } else {
-          linearSpeed = -linearSpeed;
-        }
-
-        // clear
         context.clearRect(0, 0, canvas.width, canvas.height);
 
-        drawRectangle(myRectangle, context);
+        rectangles.forEach(function(myRectangle) {
+          var linearSpeed = myRectangle.linearSpeed || 1;
+          // pixels / second
+          var newX = myRectangle.x + myRectangle.linearSpeed;
+
+          if (newX < 0) {
+            myRectangle.linearSpeed = -myRectangle.linearSpeed;
+          } else if (newX < (canvas.width - myRectangle.width - myRectangle.borderWidth / 2)) {
+            myRectangle.x = newX;
+          } else {
+            myRectangle.linearSpeed = -myRectangle.linearSpeed;
+          }
+
+          drawRectangle(myRectangle, context);
+        })
 
         // request new frame
         requestAnimFrame(function() {
-          animate(myRectangle, canvas, context, linearSpeed);
+          animate(rectangles, canvas, context);
         });
       }
 
       var canvas = document.getElementById('myCanvas');
       var context = canvas.getContext('2d');
 
-      var myRectangle = {
-        x: 0,
-        y: 75,
-        width: 650,
-        height: 15,
-        borderWidth: 1
-      };
+      function generateRectangles(rectangleCount, colors, canvas) {
+        var rectangles = [];
+        for (step = 0; step < rectangleCount; step++) {
+          var randomSeed = Math.floor(Math.random()),
+              randomColorSeed = Math.floor(Math.random() * colors.length),
+              randomXSeed = Math.floor(Math.random() * (canvas.width / 2)),
+              randomYSeed = Math.floor(canvas.height * ((step + 1) / rectangleCount)),
+              randomLinearSpeed = Math.floor(Math.random() * 3),
+              randomWidth = Math.floor(Math.random() * (canvas.width / 2));
+          var rectangleColor = colors[randomColorSeed];
+          rectangles.push({
+            x: randomXSeed,
+            y: randomYSeed,
+            width: randomWidth < 400 ? 400 : randomWidth,
+            height: 5,
+            borderWidth: 1,
+            linearSpeed: randomLinearSpeed < 1 ?
+                         randomSeed == 1 ? 1 : -1 :
+                         randomSeed == 0 ? randomLinearSpeed : -randomLinearSpeed,
+            color: rectangleColor,
+            strokeColor: '#4CB1FF'
+          });
+        }
+        return rectangles;
+      }
 
-      drawRectangle(myRectangle, context);
+      var colors = ['#6FC2F2', '#0363B6', '#454545', '#000000'];
+      // light blue, dark blue, light black, dark black
+      var rectangles = generateRectangles(50, colors, canvas);
+
+      rectangles.forEach(function(rectangle) {
+        drawRectangle(rectangle, context);
+      })
+      // drawRectangle(myRectangle, context);
+      // drawRectangle(myRectangle2, context);
 
       // wait one second before starting animation
       setTimeout(function() {
-        animate(myRectangle, canvas, context);
+        animate(rectangles, canvas, context);
       }, 1000);
     </script>
   </body>
