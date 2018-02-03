@@ -44,8 +44,9 @@
             (mousePosition.y > rectangle.y && mousePosition.y < (rectangle.y + rectangle.height))
           ) {
           rectangle.hover = true;
-        } else {
-          rectangle.hover = false;
+          setTimeout(function() {
+            rectangle.hover = false;
+          }, 1618);
         }
       });
     })
