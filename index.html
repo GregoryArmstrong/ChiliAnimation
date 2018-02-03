@@ -17,15 +17,15 @@
   <body>
     <canvas id="myCanvas" width="1681" height="800"></canvas>
     <script>
-    var canvas  = document.getElementById('myCanvas'),
-        context = canvas.getContext('2d'),
-        colors  = ['#6FC2F2', '#0363B6', '#454545', '#000000'],
-                // light blue, dark blue, light black, dark black
-        circleX = canvas.width * 0.75,
-        circleY = canvas.height * 0.50,
-        circles = generateCircles(4, colors, circleX, circleY, canvas),
+    var canvas     = document.getElementById('myCanvas'),
+        context    = canvas.getContext('2d'),
+        colors     = ['#6FC2F2', '#0363B6', '#454545', '#000000'],
+                  // light blue, dark blue, light black, dark black
+        circleX    = canvas.width * 0.75,
+        circleY    = canvas.height * 0.50,
+        circles    = generateCircles(4, colors, circleX, circleY, canvas),
         rectangles = generateRectangles(80, colors, canvas),
-        chiliLogo = new Image();
+        chiliLogo  = new Image();
 
     circles.forEach(function(circle) {
       drawCircle(circle, context);
@@ -56,9 +56,15 @@
       // update
       context.clearRect(0, 0, canvas.width, canvas.height);
 
+      context.shadowColor = '#000000';
+      context.shadowBlur  = 7.5;
+
       circles.forEach(function(circle) {
         drawCircle(circle, context);
       });
+
+      context.shadowBlur  = 0.0;
+      context.globalAlpha = 0.85;
 
       rectangles.forEach(function(myRectangle) {
         var linearSpeed = myRectangle.linearSpeed || 1;
@@ -76,6 +82,8 @@
         drawRectangle(myRectangle, context);
       });
 
+      context.globalAlpha = 1.0;
+
       drawLogo(logo, circles[0], context);
 
       // request new frame
@@ -92,10 +100,10 @@
     }
 
     function drawLogo(logo, circleReference, context) {
-      var width = 750,
+      var width  = 750,
           height = 200,
-          x = circleReference.x - (width / 2),
-          y = circleReference.y - (height / 2);
+          x      = circleReference.x - (width / 2),
+          y      = circleReference.y - (height / 2);
       context.drawImage(logo, x, y, width, height);
     }
 
@@ -111,10 +119,10 @@
       var circles = [];
       for (step = 0; step < circleCount; step++) {
         circles.push({
-          x: circleX,
-          y: circleY,
-          color: colors[step],
-          radius: (canvas.width / 1.45) / (step == 0 ? 0.1 : step)
+          x:      circleX,
+          y:      circleY,
+          color:  colors[step],
+          radius: (canvas.width / 1.4) / (step == 0 ? 0.1 : step)
         });
       };
       return circles;
@@ -123,23 +131,23 @@
     function generateRectangles(rectangleCount, colors, canvas) {
       var rectangles = [];
       for (step = 0; step < rectangleCount; step++) {
-        var randomSeed = Math.floor(Math.random()),
-            randomColorSeed = Math.floor(Math.random() * colors.length),
-            randomXSeed = Math.floor(Math.random() * (canvas.width / 2)),
-            randomYSeed = Math.floor(canvas.height * ((step + 1) / rectangleCount)),
+        var randomSeed        = Math.floor(Math.random()),
+            randomColorSeed   = Math.floor(Math.random() * colors.length),
+            randomXSeed       = Math.floor(Math.random() * (canvas.width / 2)),
+            randomYSeed       = Math.floor(canvas.height * ((step + 1) / rectangleCount)),
             randomLinearSpeed = Math.floor(Math.random() * 3),
-            randomWidth = Math.floor(Math.random() * (canvas.width / 2));
-        var rectangleColor = colors[randomColorSeed];
+            randomWidth       = Math.floor(Math.random() * (canvas.width / 2)),
+            rectangleColor    = colors[randomColorSeed];
         rectangles.push({
-          x: randomXSeed,
-          y: randomYSeed,
-          width: randomWidth < 400 ? 400 : randomWidth,
-          height: 5,
+          x:           randomXSeed,
+          y:           randomYSeed,
+          width:       randomWidth < 400 ? 400 : randomWidth,
+          height:      5,
           borderWidth: 1,
           linearSpeed: randomLinearSpeed < 1 ?
                        randomSeed == 1 ? 1 : -1 :
                        randomSeed == 0 ? randomLinearSpeed : -randomLinearSpeed,
-          color: rectangleColor
+          color:       rectangleColor
         });
       }
       return rectangles;
