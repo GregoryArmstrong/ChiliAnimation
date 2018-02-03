@@ -24,7 +24,7 @@
         circleX    = canvas.width * 0.75,
         circleY    = canvas.height * 0.50,
         circles    = generateCircles(4, colors, circleX, circleY, canvas),
-        rectangles = generateRectangles(80, colors, canvas),
+        rectangles = generateRectangles(120, colors, canvas),
         chiliLogo  = new Image();
 
     circles.forEach(function(circle) {
@@ -35,6 +35,20 @@
     })
     chiliLogo.src = "ElectricChilico_logo.png";
     drawLogo(chiliLogo, circles[0], context);
+
+    canvas.addEventListener('mousemove', function(evt) {
+      var mousePosition = getMousePos(evt);
+      rectangles.forEach(function(rectangle) {
+        if (
+            (mousePosition.x > rectangle.x && mousePosition.x < (rectangle.x + rectangle.width)) &&
+            (mousePosition.y > rectangle.y && mousePosition.y < (rectangle.y + rectangle.height))
+          ) {
+          rectangle.hover = true;
+        } else {
+          rectangle.hover = false;
+        }
+      });
+    })
 
     // wait one second before starting animation
     setTimeout(function() {
@@ -64,7 +78,6 @@
       });
 
       context.shadowBlur  = 0.0;
-      context.globalAlpha = 0.85;
 
       rectangles.forEach(function(myRectangle) {
         var linearSpeed = myRectangle.linearSpeed || 1;
@@ -85,7 +98,6 @@
       context.globalAlpha = 1.0;
 
       drawLogo(logo, circles[0], context);
-
       // request new frame
       requestAnimFrame(function() {
         animate(rectangles, circles, logo, canvas, context);
@@ -111,6 +123,13 @@
       context.beginPath();
       context.rect(myRectangle.x, myRectangle.y, myRectangle.width, myRectangle.height);
       context.fillStyle = myRectangle.color;
+      context.globalAlpha = 0.75;
+      context.shadowBlur = 0;
+      if (myRectangle.hover) {
+        context.globalAlpha = 1.0;
+        context.shadowColor = '#6FC2F2';
+        context.shadowBlur  = 2;
+      }
       context.fill();
       context.lineWidth = myRectangle.borderWidth;
     }
@@ -147,10 +166,18 @@
           linearSpeed: randomLinearSpeed < 1 ?
                        randomSeed == 1 ? 1 : -1 :
                        randomSeed == 0 ? randomLinearSpeed : -randomLinearSpeed,
-          color:       rectangleColor
+          color:       rectangleColor,
+          hover:       false
         });
       }
       return rectangles;
+    }
+
+    function getMousePos(evt) {
+      return {
+        x: evt.clientX,
+        y: evt.clientY
+      };
     }
     </script>
   </body>
