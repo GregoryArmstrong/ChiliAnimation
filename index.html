@@ -17,133 +17,133 @@
   <body>
     <canvas id="myCanvas" width="1681" height="800"></canvas>
     <script>
-      window.requestAnimFrame = (function(callback) {
-        return window.requestAnimationFrame ||
-               window.webkitRequestAnimationFrame ||
-               window.mozRequestAnimationFrame ||
-               window.oRequestAnimationFrame ||
-               window.msRequestAnimationFrame ||
-               function(callback) {
-                 window.setTimeout(callback, 1000 / 60);
-               };
-      })();
+    var canvas  = document.getElementById('myCanvas'),
+        context = canvas.getContext('2d'),
+        colors  = ['#6FC2F2', '#0363B6', '#454545', '#000000'],
+                // light blue, dark blue, light black, dark black
+        circleX = canvas.width * 0.75,
+        circleY = canvas.height * 0.50,
+        circles = generateCircles(4, colors, circleX, circleY, canvas),
+        rectangles = generateRectangles(80, colors, canvas),
+        chiliLogo = new Image();
 
-      function drawRectangle(myRectangle, context) {
-        context.beginPath();
-        context.rect(myRectangle.x, myRectangle.y, myRectangle.width, myRectangle.height);
-        context.fillStyle = myRectangle.color;
-        context.fill();
-        context.lineWidth = myRectangle.borderWidth;
-      }
+    circles.forEach(function(circle) {
+      drawCircle(circle, context);
+    })
+    rectangles.forEach(function(rectangle) {
+      drawRectangle(rectangle, context);
+    })
+    chiliLogo.src = "ElectricChilico_logo.png";
+    drawLogo(chiliLogo, circles[0], context);
 
-      function drawCircle(circle, context) {
-        context.beginPath();
-        context.arc(circle.x, circle.y, circle.radius, 0, 2 * Math.PI, false);
-        context.fillStyle = circle.color;
-        context.fill();
-      }
+    // wait one second before starting animation
+    setTimeout(function() {
+      animate(rectangles, circles, chiliLogo, canvas, context);
+    }, 1000);
 
-      function drawLogo(logo, circleReference, context) {
-        var width = 750,
-            height = 200,
-            x = circleReference.x - (width / 2),
-            y = circleReference.y - (height / 2);
-        context.drawImage(logo, x, y, width, height);
-      }
+    window.requestAnimFrame = (function(callback) {
+      return window.requestAnimationFrame ||
+             window.webkitRequestAnimationFrame ||
+             window.mozRequestAnimationFrame ||
+             window.oRequestAnimationFrame ||
+             window.msRequestAnimationFrame ||
+             function(callback) {
+               window.setTimeout(callback, 1000 / 60);
+             };
+    })();
 
-      function animate(rectangles, circles, logo, canvas, context) {
-        // update
-        context.clearRect(0, 0, canvas.width, canvas.height);
+    function animate(rectangles, circles, logo, canvas, context) {
+      // update
+      context.clearRect(0, 0, canvas.width, canvas.height);
 
-        circles.forEach(function(circle) {
-          drawCircle(circle, context);
-        });
-
-        rectangles.forEach(function(myRectangle) {
-          var linearSpeed = myRectangle.linearSpeed || 1;
-          // pixels / second
-          var newX = myRectangle.x + myRectangle.linearSpeed;
-
-          if (newX < 0) {
-            myRectangle.linearSpeed = -myRectangle.linearSpeed;
-          } else if (newX < (canvas.width - myRectangle.width - myRectangle.borderWidth / 2)) {
-            myRectangle.x = newX;
-          } else {
-            myRectangle.linearSpeed = -myRectangle.linearSpeed;
-          }
-
-          drawRectangle(myRectangle, context);
-        });
-
-        drawLogo(logo, circles[0], context);
-
-        // request new frame
-        requestAnimFrame(function() {
-          animate(rectangles, circles, logo, canvas, context);
-        });
-      }
-
-      var canvas = document.getElementById('myCanvas');
-      var context = canvas.getContext('2d');
-
-      function generateRectangles(rectangleCount, colors, canvas) {
-        var rectangles = [];
-        for (step = 0; step < rectangleCount; step++) {
-          var randomSeed = Math.floor(Math.random()),
-              randomColorSeed = Math.floor(Math.random() * colors.length),
-              randomXSeed = Math.floor(Math.random() * (canvas.width / 2)),
-              randomYSeed = Math.floor(canvas.height * ((step + 1) / rectangleCount)),
-              randomLinearSpeed = Math.floor(Math.random() * 3),
-              randomWidth = Math.floor(Math.random() * (canvas.width / 2));
-          var rectangleColor = colors[randomColorSeed];
-          rectangles.push({
-            x: randomXSeed,
-            y: randomYSeed,
-            width: randomWidth < 400 ? 400 : randomWidth,
-            height: 5,
-            borderWidth: 1,
-            linearSpeed: randomLinearSpeed < 1 ?
-                         randomSeed == 1 ? 1 : -1 :
-                         randomSeed == 0 ? randomLinearSpeed : -randomLinearSpeed,
-            color: rectangleColor
-          });
-        }
-        return rectangles;
-      }
-
-      function generateCircles(circleCount, colors, cricleX, circleY, canvas) {
-        var circles = [];
-        for (step = 0; step < circleCount; step++) {
-          circles.push({
-            x: circleX,
-            y: circleY,
-            color: colors[step],
-            radius: (canvas.width / 1.45) / (step == 0 ? 0.1 : step)
-          });
-        };
-        return circles;
-      }
-
-      var colors = ['#6FC2F2', '#0363B6', '#454545', '#000000'],
-          circleX = canvas.width * 0.75,
-          circleY = canvas.height * 0.50;
-      // light blue, dark blue, light black, dark black
-      var circles = generateCircles(4, colors, circleX, circleY, canvas);
       circles.forEach(function(circle) {
         drawCircle(circle, context);
-      })
-      var rectangles = generateRectangles(80, colors, canvas);
-      rectangles.forEach(function(rectangle) {
-        drawRectangle(rectangle, context);
-      })
-      var chiliLogo = new Image();
-      chiliLogo.src = "ElectricChilico_logo.png";
-      drawLogo(chiliLogo, circles[0], context);
+      });
 
-      // wait one second before starting animation
-      setTimeout(function() {
-        animate(rectangles, circles, chiliLogo, canvas, context);
-      }, 1000);
+      rectangles.forEach(function(myRectangle) {
+        var linearSpeed = myRectangle.linearSpeed || 1;
+        // pixels / second
+        var newX = myRectangle.x + myRectangle.linearSpeed;
+
+        if (newX < 0) {
+          myRectangle.linearSpeed = -myRectangle.linearSpeed;
+        } else if (newX < (canvas.width - myRectangle.width - myRectangle.borderWidth / 2)) {
+          myRectangle.x = newX;
+        } else {
+          myRectangle.linearSpeed = -myRectangle.linearSpeed;
+        }
+
+        drawRectangle(myRectangle, context);
+      });
+
+      drawLogo(logo, circles[0], context);
+
+      // request new frame
+      requestAnimFrame(function() {
+        animate(rectangles, circles, logo, canvas, context);
+      });
+    }
+
+    function drawCircle(circle, context) {
+      context.beginPath();
+      context.arc(circle.x, circle.y, circle.radius, 0, 2 * Math.PI, false);
+      context.fillStyle = circle.color;
+      context.fill();
+    }
+
+    function drawLogo(logo, circleReference, context) {
+      var width = 750,
+          height = 200,
+          x = circleReference.x - (width / 2),
+          y = circleReference.y - (height / 2);
+      context.drawImage(logo, x, y, width, height);
+    }
+
+    function drawRectangle(myRectangle, context) {
+      context.beginPath();
+      context.rect(myRectangle.x, myRectangle.y, myRectangle.width, myRectangle.height);
+      context.fillStyle = myRectangle.color;
+      context.fill();
+      context.lineWidth = myRectangle.borderWidth;
+    }
+
+    function generateCircles(circleCount, colors, cricleX, circleY, canvas) {
+      var circles = [];
+      for (step = 0; step < circleCount; step++) {
+        circles.push({
+          x: circleX,
+          y: circleY,
+          color: colors[step],
+          radius: (canvas.width / 1.45) / (step == 0 ? 0.1 : step)
+        });
+      };
+      return circles;
+    }
+
+    function generateRectangles(rectangleCount, colors, canvas) {
+      var rectangles = [];
+      for (step = 0; step < rectangleCount; step++) {
+        var randomSeed = Math.floor(Math.random()),
+            randomColorSeed = Math.floor(Math.random() * colors.length),
+            randomXSeed = Math.floor(Math.random() * (canvas.width / 2)),
+            randomYSeed = Math.floor(canvas.height * ((step + 1) / rectangleCount)),
+            randomLinearSpeed = Math.floor(Math.random() * 3),
+            randomWidth = Math.floor(Math.random() * (canvas.width / 2));
+        var rectangleColor = colors[randomColorSeed];
+        rectangles.push({
+          x: randomXSeed,
+          y: randomYSeed,
+          width: randomWidth < 400 ? 400 : randomWidth,
+          height: 5,
+          borderWidth: 1,
+          linearSpeed: randomLinearSpeed < 1 ?
+                       randomSeed == 1 ? 1 : -1 :
+                       randomSeed == 0 ? randomLinearSpeed : -randomLinearSpeed,
+          color: rectangleColor
+        });
+      }
+      return rectangles;
+    }
     </script>
   </body>
 </html>
